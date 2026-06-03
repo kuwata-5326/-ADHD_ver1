@@ -1,0 +1,455 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --c-accent:#1D9E75;--c-accent2:#0F6E56;
+  --c-warn:#BA7517;--c-danger:#A32D2D;
+  --c-info:#185FA5;
+  --radius:12px;--radius-sm:8px;
+  --gap:12px;
+}
+body{font-family:var(--font-sans,'system-ui');background:transparent}
+.app{max-width:700px;margin:0 auto;padding:1rem 0.5rem 3rem}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.hdr h1{font-size:20px;font-weight:500;color:var(--color-text-primary);display:flex;align-items:center;gap:8px}
+.hdr h1 i{font-size:22px;color:var(--c-accent)}
+.date-badge{font-size:13px;color:var(--color-text-secondary);background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--radius-sm);padding:4px 10px}
+
+/* PROGRESS BAR */
+.progress-wrap{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--radius);padding:0.75rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:12px}
+.progress-label{font-size:13px;color:var(--color-text-secondary);white-space:nowrap}
+.progress-bar{flex:1;height:8px;background:var(--color-background-tertiary);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;border-radius:4px;background:var(--c-accent);transition:width 0.4s ease}
+.progress-count{font-size:13px;font-weight:500;color:var(--c-accent);white-space:nowrap}
+
+/* INPUT AREA */
+.input-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--radius);padding:1rem;margin-bottom:1rem}
+.input-row{display:flex;gap:8px;margin-bottom:8px}
+.input-row input[type=text]{flex:1;font-size:14px;padding:8px 12px;border-radius:var(--radius-sm);border:0.5px solid var(--color-border-secondary)}
+.meta-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.meta-row input[type=date],.meta-row select{font-size:13px;padding:6px 10px;border-radius:var(--radius-sm);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);height:34px}
+.btn-add{background:var(--c-accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 18px;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;height:36px}
+.btn-add:hover{background:var(--c-accent2)}
+.btn-add i{font-size:16px}
+
+/* FILTERS */
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+.filter-btn{font-size:12px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-secondary);cursor:pointer;display:flex;align-items:center;gap:5px;transition:all 0.15s}
+.filter-btn:hover{border-color:var(--c-accent);color:var(--c-accent)}
+.filter-btn.active{background:var(--c-accent);color:#fff;border-color:var(--c-accent)}
+.filter-btn .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+
+/* TASKS */
+.task-list{display:flex;flex-direction:column;gap:8px}
+.task-item{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--radius);padding:0.75rem 1rem;display:flex;align-items:flex-start;gap:10px;transition:all 0.2s;cursor:default;position:relative;border-left:3px solid transparent}
+.task-item:hover{border-color:var(--color-border-secondary)}
+.task-item.done{opacity:0.55}
+.task-item.done .task-title{text-decoration:line-through;color:var(--color-text-secondary)}
+.task-item.urgent{border-left-color:#E24B4A}
+.task-item.high{border-left-color:#EF9F27}
+.task-item.normal{border-left-color:#1D9E75}
+.task-item.low{border-left-color:#888780}
+
+/* checkbox */
+.cb{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--color-border-secondary);cursor:pointer;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.cb:hover{border-color:var(--c-accent)}
+.cb.checked{background:var(--c-accent);border-color:var(--c-accent)}
+.cb.checked::after{content:'';width:6px;height:10px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(40deg);margin-top:-2px}
+
+.task-body{flex:1;min-width:0}
+.task-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.task-title{font-size:14px;font-weight:500;color:var(--color-text-primary);flex:1;min-width:0}
+.task-meta{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap}
+.badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500;white-space:nowrap}
+.badge-urgent{background:#FCEBEB;color:#A32D2D}
+.badge-high{background:#FAEEDA;color:#854F0B}
+.badge-normal{background:#E1F5EE;color:#0F6E56}
+.badge-low{background:#F1EFE8;color:#5F5E5A}
+.badge-date{background:var(--color-background-secondary);color:var(--color-text-secondary);display:flex;align-items:center;gap:3px}
+.badge-date.overdue{background:#FCEBEB;color:#A32D2D}
+.badge-date.soon{background:#FAEEDA;color:#854F0B}
+.task-note{font-size:12px;color:var(--color-text-secondary);margin-top:4px;line-height:1.5}
+.task-status-badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:4px}
+.s-todo{background:#F1EFE8;color:#5F5E5A}
+.s-doing{background:#E6F1FB;color:#185FA5}
+.s-review{background:#FAEEDA;color:#854F0B}
+.s-done{background:#E1F5EE;color:#0F6E56}
+
+/* actions */
+.task-actions{display:flex;gap:4px;opacity:0;transition:opacity 0.15s;flex-shrink:0}
+.task-item:hover .task-actions{opacity:1}
+.act-btn{width:28px;height:28px;border-radius:6px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--color-text-secondary)}
+.act-btn:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.act-btn.danger:hover{color:#A32D2D;background:#FCEBEB}
+
+/* memo */
+.memo-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--radius);padding:1rem;margin-bottom:1rem}
+.memo-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.memo-header span{font-size:13px;font-weight:500;color:var(--color-text-secondary);display:flex;align-items:center;gap:6px}
+.memo-hint{font-size:11px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:3px 8px;border-radius:5px}
+.memo-ta{width:100%;min-height:90px;font-size:13px;line-height:1.6;border:0.5px solid var(--color-border-secondary);border-radius:var(--radius-sm);padding:8px 10px;resize:vertical;color:var(--color-text-primary);background:var(--color-background-primary);font-family:inherit}
+.memo-ta:focus{outline:none;border-color:var(--c-accent)}
+.extract-btn{margin-top:8px;font-size:13px;padding:6px 14px;border-radius:var(--radius-sm);border:0.5px solid var(--c-accent);color:var(--c-accent);background:transparent;cursor:pointer;display:flex;align-items:center;gap:6px}
+.extract-btn:hover{background:#E1F5EE}
+
+/* empty */
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--color-text-secondary);font-size:14px}
+.empty i{font-size:32px;margin-bottom:8px;display:block;opacity:0.4}
+
+/* toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--radius-sm);padding:10px 18px;font-size:13px;font-weight:500;box-shadow:0 2px 12px rgba(0,0,0,0.12);opacity:0;transition:opacity 0.3s;pointer-events:none;color:var(--color-text-primary);z-index:9999;display:flex;align-items:center;gap:8px}
+.toast.show{opacity:1}
+
+/* section label */
+.section-label{font-size:12px;color:var(--color-text-secondary);font-weight:500;margin-bottom:6px;margin-top:0.5rem;letter-spacing:0.04em}
+
+/* edit inline */
+.edit-input{font-size:14px;font-weight:500;border:none;border-bottom:1.5px solid var(--c-accent);background:transparent;color:var(--color-text-primary);width:100%;outline:none;padding:0 2px}
+
+@media(max-width:500px){
+  .meta-row{flex-direction:column}
+  .meta-row input[type=date],.meta-row select{width:100%}
+  .btn-add{width:100%;justify-content:center}
+  .task-actions{opacity:1}
+  .filters{gap:4px}
+  .filter-btn{font-size:11px;padding:4px 9px}
+}
+</style>
+
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden">ADHD対応タスク管理アプリ。タスクの追加・進捗管理・メモからのタスク抽出ができます。</h2>
+
+<div class="app">
+  <div class="hdr">
+    <h1><i class="ti ti-checkbox" aria-hidden="true"></i>タスク管理</h1>
+    <span class="date-badge" id="today-label"></span>
+  </div>
+
+  <!-- progress -->
+  <div class="progress-wrap">
+    <span class="progress-label"><i class="ti ti-trophy" aria-hidden="true" style="font-size:15px;vertical-align:-2px;margin-right:3px;color:var(--c-warn)"></i>本日の達成率</span>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    <span class="progress-count" id="prog-count">0 / 0</span>
+  </div>
+
+  <!-- input -->
+  <div class="input-card">
+    <div class="input-row">
+      <input type="text" id="task-input" placeholder="タスクを入力…（Enterで追加）" aria-label="タスク入力" />
+    </div>
+    <div class="meta-row">
+      <input type="date" id="task-date" aria-label="期限日" />
+      <select id="task-priority" aria-label="優先度">
+        <option value="urgent">🔴 最重要</option>
+        <option value="high">🟡 高</option>
+        <option value="normal" selected>🟢 普通</option>
+        <option value="low">⚪ 低</option>
+      </select>
+      <select id="task-status-sel" aria-label="ステータス">
+        <option value="todo">未着手</option>
+        <option value="doing">進行中</option>
+        <option value="review">確認待ち</option>
+        <option value="done">完了</option>
+      </select>
+      <button class="btn-add" id="add-btn" aria-label="タスクを追加"><i class="ti ti-plus" aria-hidden="true"></i>追加</button>
+    </div>
+  </div>
+
+  <!-- filters -->
+  <div class="filters" role="group" aria-label="フィルター">
+    <button class="filter-btn active" data-f="all">すべて</button>
+    <button class="filter-btn" data-f="todo"><span class="dot" style="background:#888780"></span>未着手</button>
+    <button class="filter-btn" data-f="doing"><span class="dot" style="background:#185FA5"></span>進行中</button>
+    <button class="filter-btn" data-f="review"><span class="dot" style="background:#BA7517"></span>確認待ち</button>
+    <button class="filter-btn" data-f="done"><span class="dot" style="background:#1D9E75"></span>完了</button>
+    <button class="filter-btn" data-f="overdue"><span class="dot" style="background:#A32D2D"></span>期限切れ</button>
+    <button class="filter-btn" data-f="soon"><span class="dot" style="background:#EF9F27"></span>もうすぐ</button>
+  </div>
+
+  <!-- task list -->
+  <div id="task-list" class="task-list" aria-live="polite" aria-label="タスク一覧"></div>
+
+  <!-- memo -->
+  <div class="memo-card" style="margin-top:1.5rem">
+    <div class="memo-header">
+      <span><i class="ti ti-notes" aria-hidden="true" style="font-size:16px"></i>メモ</span>
+      <span class="memo-hint">⌘+Enter または Ctrl+Enter で保存</span>
+    </div>
+    <textarea class="memo-ta" id="memo-ta" placeholder="自由にメモを書いてください&#10;例）・〇〇に電話する&#10;・書類を提出する&#10;&#10;✨ 「タスク抽出」でメモからタスクを自動追加できます" aria-label="メモ入力欄"></textarea>
+    <button class="extract-btn" id="extract-btn" aria-label="メモからタスクを抽出"><i class="ti ti-wand" aria-hidden="true"></i>メモからタスクを抽出</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+
+<script>
+const STORAGE_KEY='adhd_tasks_v3';
+const MEMO_KEY='adhd_memo_v1';
+
+let tasks=[];
+let filter='all';
+let editingId=null;
+
+function save(){try{window.storage&&window.storage.set(STORAGE_KEY,JSON.stringify(tasks));localStorage&&localStorage.setItem(STORAGE_KEY,JSON.stringify(tasks))}catch(e){}}
+function saveMemo(){try{localStorage&&localStorage.setItem(MEMO_KEY,document.getElementById('memo-ta').value)}catch(e){}}
+function loadMemo(){try{const m=localStorage&&localStorage.getItem(MEMO_KEY);if(m)document.getElementById('memo-ta').value=m}catch(e){}}
+
+async function load(){
+  try{
+    if(window.storage){
+      const r=await window.storage.get(STORAGE_KEY);
+      if(r&&r.value){tasks=JSON.parse(r.value);render();return}
+    }
+  }catch(e){}
+  try{const s=localStorage&&localStorage.getItem(STORAGE_KEY);if(s){tasks=JSON.parse(s);render()}}catch(e){}
+}
+
+function today(){
+  const d=new Date();
+  return d.toISOString().split('T')[0];
+}
+function fmtDate(s){
+  if(!s)return null;
+  const d=new Date(s+'T00:00:00');
+  const m=d.getMonth()+1,day=d.getDate();
+  const now=new Date(today()+'T00:00:00');
+  const diff=Math.round((d-now)/(1000*60*60*24));
+  let cls='badge-date',txt=m+'/'+day;
+  if(diff<0){cls='badge-date overdue';txt='⚠ '+txt+' 期限切れ'}
+  else if(diff===0){cls='badge-date soon';txt='今日'}
+  else if(diff===1){cls='badge-date soon';txt='明日'}
+  else if(diff<=3){cls='badge-date soon';txt=txt+' ('+diff+'日後)'}
+  return{cls,txt};
+}
+function priLabel(p){return{urgent:'最重要',high:'高',normal:'普通',low:'低'}[p]||'普通'}
+function stLabel(s){return{todo:'未着手',doing:'進行中',review:'確認待ち',done:'完了'}[s]||'未着手'}
+function stClass(s){return{todo:'s-todo',doing:'s-doing',review:'s-review',done:'s-done'}[s]||'s-todo'}
+
+function isOverdue(t){if(!t.date||t.status==='done')return false;return t.date<today()}
+function isSoon(t){if(!t.date||t.status==='done')return false;const d=new Date(t.date+'T00:00:00');const n=new Date(today()+'T00:00:00');const diff=Math.round((d-n)/(1000*60*60*24));return diff>=0&&diff<=3}
+
+function filterTasks(){
+  if(filter==='all')return tasks;
+  if(filter==='overdue')return tasks.filter(isOverdue);
+  if(filter==='soon')return tasks.filter(isSoon);
+  return tasks.filter(t=>t.status===filter);
+}
+
+function updateProgress(){
+  const all=tasks.filter(t=>t.status!=='done'||true);
+  const done=tasks.filter(t=>t.status==='done').length;
+  const total=tasks.length;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-count').textContent=done+' / '+total;
+}
+
+function render(){
+  updateProgress();
+  const list=document.getElementById('task-list');
+  const filtered=filterTasks();
+  if(!filtered.length){
+    list.innerHTML='<div class="empty"><i class="ti ti-mood-smile-beam" aria-hidden="true"></i>'+
+      (filter==='all'?'タスクなし！すっきり✨':'該当するタスクはありません')+'</div>';
+    return;
+  }
+  // sort: urgent first, then by date
+  const order={urgent:0,high:1,normal:2,low:3};
+  const sorted=[...filtered].sort((a,b)=>{
+    if(a.status==='done'&&b.status!=='done')return 1;
+    if(b.status==='done'&&a.status!=='done')return -1;
+    const po=(order[a.priority]||2)-(order[b.priority]||2);
+    if(po!==0)return po;
+    if(a.date&&b.date)return a.date.localeCompare(b.date);
+    if(a.date)return -1;
+    if(b.date)return 1;
+    return 0;
+  });
+  list.innerHTML=sorted.map(t=>{
+    const df=t.date?fmtDate(t.date):null;
+    const isEdit=editingId===t.id;
+    return`<div class="task-item ${t.priority} ${t.status==='done'?'done':''}" data-id="${t.id}" role="listitem">
+  <div class="cb ${t.status==='done'?'checked':''}" role="checkbox" aria-checked="${t.status==='done'}" tabindex="0" aria-label="${t.title}を完了にする" onclick="toggleDone('${t.id}')" onkeydown="if(event.key==='Enter'||event.key===' ')toggleDone('${t.id}')"></div>
+  <div class="task-body">
+    <div class="task-top">
+      ${isEdit
+        ?`<input class="edit-input" id="edit-inp-${t.id}" value="${t.title.replace(/"/g,'&quot;')}" onblur="saveEdit('${t.id}')" onkeydown="editKey(event,'${t.id}')" aria-label="タスク名を編集" />`
+        :`<span class="task-title">${escHtml(t.title)}</span>`}
+    </div>
+    <div class="task-meta">
+      <span class="badge badge-${t.priority}" aria-label="優先度：${priLabel(t.priority)}">${priLabel(t.priority)}</span>
+      <span class="task-status-badge ${stClass(t.status)}" onclick="cycleStatus('${t.id}')" role="button" tabindex="0" aria-label="ステータス：${stLabel(t.status)}。クリックで変更" onkeydown="if(event.key==='Enter')cycleStatus('${t.id}')">${stLabel(t.status)}</span>
+      ${df?`<span class="badge ${df.cls}" aria-label="期限：${df.txt}"><i class="ti ti-calendar" aria-hidden="true" style="font-size:11px"></i>${df.txt}</span>`:''}
+      ${t.note?`<i class="ti ti-note" aria-hidden="true" style="font-size:13px;color:var(--color-text-secondary)" title="メモあり"></i>`:''}
+    </div>
+    ${t.note&&!isEdit?`<div class="task-note">${escHtml(t.note)}</div>`:''}
+  </div>
+  <div class="task-actions" role="group" aria-label="${t.title}の操作">
+    <button class="act-btn" onclick="startEdit('${t.id}')" aria-label="編集"><i class="ti ti-pencil" aria-hidden="true" style="font-size:15px"></i></button>
+    <button class="act-btn danger" onclick="deleteTask('${t.id}')" aria-label="削除"><i class="ti ti-trash" aria-hidden="true" style="font-size:15px"></i></button>
+  </div>
+</div>`;
+  }).join('');
+  // focus edit if editing
+  if(editingId){
+    const el=document.getElementById('edit-inp-'+editingId);
+    if(el){el.focus();el.select();}
+  }
+}
+
+function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+function addTask(){
+  const inp=document.getElementById('task-input');
+  const title=inp.value.trim();
+  if(!title)return;
+  const task={
+    id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+    title,
+    date:document.getElementById('task-date').value||'',
+    priority:document.getElementById('task-priority').value,
+    status:document.getElementById('task-status-sel').value,
+    note:'',
+    created:new Date().toISOString()
+  };
+  tasks.unshift(task);
+  save();
+  render();
+  inp.value='';
+  toast('タスクを追加しました ✓','var(--c-accent)');
+}
+
+function toggleDone(id){
+  const t=tasks.find(x=>x.id===id);
+  if(!t)return;
+  t.status=t.status==='done'?'todo':'done';
+  save();render();
+  if(t.status==='done')toast('完了！お疲れさまでした 🎉','var(--c-accent)');
+}
+
+function cycleStatus(id){
+  const t=tasks.find(x=>x.id===id);
+  if(!t)return;
+  const cycle=['todo','doing','review','done'];
+  t.status=cycle[(cycle.indexOf(t.status)+1)%cycle.length];
+  save();render();
+  toast(stLabel(t.status)+'に変更しました','var(--c-info)');
+}
+
+function deleteTask(id){
+  const t=tasks.find(x=>x.id===id);
+  if(!t)return;
+  tasks=tasks.filter(x=>x.id!==id);
+  save();render();
+  toast('削除しました','var(--c-danger)');
+}
+
+function startEdit(id){editingId=id;render();}
+function saveEdit(id){
+  const inp=document.getElementById('edit-inp-'+id);
+  if(!inp)return;
+  const v=inp.value.trim();
+  if(v){const t=tasks.find(x=>x.id===id);if(t)t.title=v;}
+  editingId=null;save();render();
+}
+function editKey(e,id){
+  if(e.key==='Enter'){e.preventDefault();saveEdit(id);}
+  if(e.key==='Escape'){editingId=null;render();}
+}
+
+function toast(msg,color){
+  const el=document.getElementById('toast');
+  el.innerHTML=`<i class="ti ti-check-circle" aria-hidden="true" style="font-size:16px;color:${color||'var(--c-accent)'}"></i>${escHtml(msg)}`;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+// extract tasks from memo with Claude
+document.getElementById('extract-btn').addEventListener('click',async()=>{
+  const memo=document.getElementById('memo-ta').value.trim();
+  if(!memo){toast('メモを入力してください','var(--c-warn)');return;}
+  const btn=document.getElementById('extract-btn');
+  btn.disabled=true;
+  btn.innerHTML='<i class="ti ti-loader-2" aria-hidden="true" style="animation:spin 1s linear infinite"></i>抽出中...';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',max_tokens:1000,
+        messages:[{role:'user',content:`以下のメモから、タスクとして実行すべき行動項目を抽出してください。
+JSONのみで返答し、前置きや説明は不要です。形式:
+{"tasks":[{"title":"タスク名","priority":"normal"}]}
+priorityは "urgent","high","normal","low" のいずれか。
+明らかに急ぎのものはurgent、重要そうなものはhigh、それ以外はnormalにしてください。
+
+メモ:
+${memo}`}]
+      })
+    });
+    const data=await res.json();
+    const text=data.content.map(i=>i.text||'').join('');
+    const clean=text.replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(clean);
+    let added=0;
+    (parsed.tasks||[]).forEach(t=>{
+      if(t.title&&t.title.trim()){
+        tasks.unshift({
+          id:Date.now().toString(36)+Math.random().toString(36).slice(2,6)+added,
+          title:t.title.trim(),date:'',priority:t.priority||'normal',
+          status:'todo',note:'メモから抽出',created:new Date().toISOString()
+        });
+        added++;
+      }
+    });
+    save();render();
+    toast(`${added}件のタスクを抽出しました ✓`,'var(--c-accent)');
+  }catch(e){
+    toast('抽出に失敗しました。再試行してください','var(--c-danger)');
+  }
+  btn.disabled=false;
+  btn.innerHTML='<i class="ti ti-wand" aria-hidden="true"></i>メモからタスクを抽出';
+});
+
+// keyboard shortcuts
+document.getElementById('task-input').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){e.preventDefault();addTask();}
+});
+document.getElementById('add-btn').addEventListener('click',addTask);
+
+document.getElementById('memo-ta').addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){e.preventDefault();saveMemo();toast('メモを保存しました','var(--c-info)');}
+});
+document.getElementById('memo-ta').addEventListener('input',saveMemo);
+
+// filters
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    filter=btn.dataset.f;
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  });
+});
+
+// date label
+function setDateLabel(){
+  const d=new Date();
+  const label=['日','月','火','水','木','金','土'][d.getDay()];
+  document.getElementById('today-label').textContent=
+    d.getFullYear()+'/'+(d.getMonth()+1).toString().padStart(2,'0')+'/'+d.getDate().toString().padStart(2,'0')+' ('+label+')';
+}
+
+// spinner keyframe
+const style=document.createElement('style');
+style.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
+document.head.appendChild(style);
+
+// default date = today
+document.getElementById('task-date').value=today();
+
+setDateLabel();
+loadMemo();
+load();
+</script>
