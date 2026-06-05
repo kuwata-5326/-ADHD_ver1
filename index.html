@@ -518,9 +518,14 @@ function renderAll(){
   ['todo','doing','review','fix','done'].forEach(s=>{
     document.getElementById('sc-'+s).textContent=tasks.filter(t=>t.status===s).length;
   });
-  const sorted=sortArr(tasks);
+  // 未完了・完了で分離
+  const active=tasks.filter(t=>t.status!=='done');
+  const done=tasks.filter(t=>t.status==='done');
+
+  // 未完了：期限切れ→今日→近日→それ以降→日付なし
+  const sortedActive=sortArr(active);
   const g={overdue:[],today:[],soon:[],future:[],nodate:[]};
-  sorted.forEach(t=>{
+  sortedActive.forEach(t=>{
     if(!t.date){g.nodate.push(t);return}
     const diff=Math.round((new Date(t.date+'T00:00:00')-new Date(td()+'T00:00:00'))/864e5);
     if(diff<0)g.overdue.push(t);
@@ -535,6 +540,11 @@ function renderAll(){
     html+=`<div class="grp-lbl">${labels[k]}（${g[k].length}件）</div>`;
     html+=g[k].map(cardHTML).join('');
   });
+  // 完了済みを最下部にまとめて表示
+  if(done.length){
+    html+=`<div class="grp-lbl" style="background:#D4EFE4;color:var(--green2)">✅ 完了済み（${done.length}件）</div>`;
+    html+=sortArr(done).map(cardHTML).join('');
+  }
   document.getElementById('all-list').innerHTML=html||'<div class="empty"><i class="ti ti-list"></i>タスクなし</div>';
 }
 
