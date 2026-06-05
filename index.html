@@ -199,6 +199,19 @@ input[type=date].sel{font-size:13px}
 .btn-clear{font-size:12px;padding:7px 12px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--white);color:var(--muted);cursor:pointer}
 .btn-clear:hover{background:var(--red-lt);color:var(--red);border-color:var(--red)}
 
+
+/* TASK MEMO */
+.task-memo-wrap{margin-top:8px}
+.task-memo-toggle{font-size:11px;font-weight:600;color:var(--muted);background:transparent;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;padding:2px 0}
+.task-memo-toggle:hover{color:var(--green)}
+.task-memo-toggle i{font-size:13px}
+.task-memo-area{display:none;margin-top:6px}
+.task-memo-area.open{display:block}
+.task-memo-ta{width:100%;font-size:12px;line-height:1.6;border:1px solid rgba(0,0,0,.15);border-radius:6px;padding:7px 9px;resize:none;background:rgba(255,255,255,.6);color:var(--text);font-family:inherit;outline:none;min-height:60px}
+.task-memo-ta:focus{border-color:var(--green);background:#fff}
+.task-memo-hint{font-size:10px;color:var(--muted);margin-top:3px;text-align:right}
+.has-memo-dot{width:6px;height:6px;border-radius:50%;background:var(--orange);display:inline-block;margin-left:3px;vertical-align:middle}
+
 /* TOAST */
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1A1A18;color:#fff;border-radius:var(--rs);padding:9px 18px;font-size:13px;font-weight:500;white-space:nowrap;opacity:0;transition:opacity .3s;pointer-events:none;z-index:300;display:flex;align-items:center;gap:7px;box-shadow:0 4px 12px rgba(0,0,0,.2)}
 .toast.show{opacity:1}
@@ -462,6 +475,19 @@ function cardHTML(t){
     </div>
     <button class="del-btn" onclick="moveTrash('${t.id}')" aria-label="ゴミ箱へ" title="ゴミ箱へ移動"><i class="ti ti-trash"></i></button>
   </div>
+  <div class="task-memo-wrap">
+    <button class="task-memo-toggle" onclick="toggleMemo('${t.id}')" id="memo-toggle-${t.id}">
+      <i class="ti ti-notes"></i>メモ${t.memo?'<span class=\'has-memo-dot\'></span>':''}
+    </button>
+    <div class="task-memo-area" id="memo-area-${t.id}">
+      <textarea class="task-memo-ta" id="memo-ta-${t.id}"
+        placeholder="このタスクのメモを入力..."
+        onblur="saveTaskMemo('${t.id}')"
+        onkeydown="if((event.metaKey||event.ctrlKey)&&event.key==='Enter'){event.preventDefault();saveTaskMemo('${t.id}')}"
+      >${esc(t.memo||'')}</textarea>
+      <div class="task-memo-hint">⌘+Enter または フォーカスを外すと保存</div>
+    </div>
+  </div>
 </div>
 </div>`;
 }
@@ -570,6 +596,34 @@ function restore(id){
   tasks.unshift(task);trash=trash.filter(x=>x.id!==id);
   save();saveTrash();render();renderTrash();toast('タスクを復元しました');
 }
+
+/* TASK MEMO */
+function toggleMemo(id){
+  const area=document.getElementById('memo-area-'+id);
+  const ta=document.getElementById('memo-ta-'+id);
+  if(!area)return;
+  const isOpen=area.classList.contains('open');
+  area.classList.toggle('open',!isOpen);
+  if(!isOpen&&ta)setTimeout(()=>ta.focus(),50);
+}
+function saveTaskMemo(id){
+  const t=tasks.find(x=>x.id===id);if(!t)return;
+  const ta=document.getElementById('memo-ta-'+id);if(!ta)return;
+  const val=ta.value;
+  if(t.memo===val)return;
+  t.memo=val;
+  save();
+  // update toggle dot without full re-render
+  const toggle=document.getElementById('memo-toggle-'+id);
+  if(toggle){
+    const dot=toggle.querySelector('.has-memo-dot');
+    if(val&&!dot){
+      const span=document.createElement('span');span.className='has-memo-dot';toggle.appendChild(span);
+    }else if(!val&&dot){dot.remove()}
+  }
+  toast('メモを保存しました');
+}
+
 function permDel(id){trash=trash.filter(x=>x.id!==id);saveTrash();renderTrash();toast('完全に削除しました')}
 
 /* TAB SWITCH */
