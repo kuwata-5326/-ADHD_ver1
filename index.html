@@ -411,7 +411,10 @@ function sortArr(arr){
 }
 
 function filtered(){
-  if(filter==='all')return tasks;
+  // 「完了」フィルターを明示的に選んだ時だけ完了タスクを表示、それ以外は今日タブでは非表示
+  const isToday=document.getElementById('pane-today').classList.contains('active');
+  if(filter==='done')return tasks.filter(t=>t.status==='done');
+  if(filter==='all')return isToday?tasks.filter(t=>t.status!=='done'):tasks;
   if(filter==='overdue')return tasks.filter(t=>t.date&&t.status!=='done'&&t.date<td());
   return tasks.filter(t=>t.status===filter);
 }
