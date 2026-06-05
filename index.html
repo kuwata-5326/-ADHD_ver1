@@ -399,14 +399,29 @@ function sortArr(arr){
   return[...arr].sort((a,b)=>{
     if(a.status==='done'&&b.status!=='done')return 1;
     if(b.status==='done'&&a.status!=='done')return -1;
-    const aD=a.date?Math.round((new Date(a.date+'T00:00:00')-new Date(td()+'T00:00:00'))/864e5):null;
-    const bD=b.date?Math.round((new Date(b.date+'T00:00:00')-new Date(td()+'T00:00:00'))/864e5):null;
-    const aOv=aD!==null&&aD<0,bOv=bD!==null&&bD<0;
-    if(aOv&&!bOv)return -1;if(!aOv&&bOv)return 1;
-    if(aOv&&bOv){const p=(priOrd[a.priority]||2)-(priOrd[b.priority]||2);return p||a.created.localeCompare(b.created)}
-    if(aD!==null&&bD!==null){if(aD!==bD)return aD-bD;const p=(priOrd[a.priority]||2)-(priOrd[b.priority]||2);return p||a.created.localeCompare(b.created)}
-    if(aD!==null)return -1;if(bD!==null)return 1;
-    const p=(priOrd[a.priority]||2)-(priOrd[b.priority]||2);return p||a.created.localeCompare(b.created);
+    const now=new Date(td()+'T00:00:00');
+    const aD=a.date?Math.round((new Date(a.date+'T00:00:00')-now)/864e5):null;
+    const bD=b.date?Math.round((new Date(b.date+'T00:00:00')-now)/864e5):null;
+    const aOv=aD!==null&&aD<0, bOv=bD!==null&&bD<0;
+    // 1. 期限切れを先頭に
+    if(aOv&&!bOv)return -1;
+    if(!aOv&&bOv)return 1;
+    // 2. 同じ日付かどうか確認
+    if(aD!==null&&bD!==null){
+      if(aD!==bD)return aD-bD; // 日付が近い順
+      // 3. 同じ日付なら優先度順
+      const p=(priOrd[a.priority]||2)-(priOrd[b.priority]||2);
+      if(p!==0)return p;
+      // 4. 優先度も同じなら作成順
+      return a.created.localeCompare(b.created);
+    }
+    // 5. 日付ありが日付なしより前
+    if(aD!==null&&bD===null)return -1;
+    if(aD===null&&bD!==null)return 1;
+    // 6. 両方日付なしなら優先度順→作成順
+    const p=(priOrd[a.priority]||2)-(priOrd[b.priority]||2);
+    if(p!==0)return p;
+    return a.created.localeCompare(b.created);
   });
 }
 
